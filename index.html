@@ -3,24 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Juego de Tres en Raya</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { 
-        font-family: Arial, sans-serif; 
-        text-align: center; 
-        background-color: #02141a;
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      background-color: #02141a;
+      margin: 0;
+      padding: 0 10px;
     }
+
     .board {
       display: grid;
-      grid-template-columns: repeat(3, 100px);
+      grid-template-columns: repeat(3, min(30vw, 100px));
       gap: 7px;
       justify-content: center;
       margin-top: 20px;
-      
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
     }
+
     .cell {
       border-radius: 10px;
-      width: 100px; height: 100px;
-      font-size: 36px;
+      width: 100%; 
+      aspect-ratio: 1 / 1;
+      font-size: 7vw;
       cursor: pointer;
       border: 2px solid #04743c;
       display: flex;
@@ -28,64 +36,87 @@
       justify-content: center;
       color: #3cff00;
     }
-    .cell:hover{
-        background-color: #022530;
-        color: aliceblue;
+
+    .cell:hover {
+      background-color: #022530;
+      color: aliceblue;
     }
+
     .result, .simulations { 
-        margin-top: 20px;
-        color: #a5eeca; 
+      margin-top: 20px;
+      color: #a5eeca; 
     }
+
     table {
-      width: 60%; 
+      width: 100%; 
+      max-width: 800px;
       margin: 20px auto; 
       border-collapse: collapse;
+      font-size: 14px;
     }
+
     th, td {
       border: 1px solid #04743c; 
-      padding: 8px;
+      padding: 6px;
       text-align: center;
     }
-    th { background-color: #03524b; }
-    .tablero { font-family: monospace; white-space: pre; }
+
+    th {
+      background-color: #03524b;
+      color: white;
+    }
+
+    .tablero {
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
     button {
-      margin: 10px 5px; padding: 10px 20px;
+      margin: 10px 5px;
+      padding: 10px 20px;
       background-color: #023632;
       color: #abd89d;
       font-size: 16px;
       border-radius: 12px;
+      border: none;
     }
+
     h1, h2 {
       color: #bcd4c8; 
       margin-top: 20px;
       font-weight: bold;
       font-size: 25px;
     }
+
+    @media (max-width: 500px) {
+      h1, h2 {
+        font-size: 20px;
+      }
+      .cell {
+        font-size: 10vw;
+      }
+      table {
+        font-size: 12px;
+      }
+    }
   </style>
 </head>
 <body>
-
- 
-
   <h2>Modelación y Simulación de Sistemas</h2>
-   <h1 >
-    Juego de Tres en Raya
-
-  </h1>
+  <h1>Juego de Tres en Raya</h1>
   <div class="board" id="board"></div>
   <div class="result" id="result"></div>
   <button onclick="startGame()">Reiniciar</button>
   <button onclick="simulateGames(15)">Simular 15 Juegos</button>
-
   <div class="simulations" id="simulationResult"></div>
 
   <script>
     let board, currentPlayer, resultShown;
 
     const winPatterns = [
-      [0,1,2], [3,4,5], [6,7,8], // filas
-      [0,3,6], [1,4,7], [2,5,8], // columnas
-      [0,4,8], [2,4,6]           // diagonales
+      [0,1,2], [3,4,5], [6,7,8], 
+      [0,3,6], [1,4,7], [2,5,8], 
+      [0,4,8], [2,4,6]
     ];
 
     function startGame() {
@@ -142,7 +173,6 @@
           for (let p of winPatterns) {
             if (p.every(i => b[i] === turn)) {
               winner = turn;
-              // Determinar tipo de victoria
               if (p[0] % 3 === 0 && p[1] % 3 === 1 && p[2] % 3 === 2) how = "Fila";
               else if (p[0] < 3 && p[1] < 6 && p[2] < 9 && p[0] % 3 === p[1] % 3) how = "Columna";
               else how = "Diagonal";
@@ -176,12 +206,12 @@
 
     function drawBoard(b) {
       return `
-      ${b[0] || " "} | ${b[1] || " "} | ${b[2] || " "}
-      ---------
-      ${b[3] || " "} | ${b[4] || " "} | ${b[5] || " "}
-      ---------
-      ${b[6] || " "} | ${b[7] || " "} | ${b[8] || " "}
-      `;
+${b[0] || " "} | ${b[1] || " "} | ${b[2] || " "}
+---------
+${b[3] || " "} | ${b[4] || " "} | ${b[5] || " "}
+---------
+${b[6] || " "} | ${b[7] || " "} | ${b[8] || " "}
+`;
     }
 
     function buildTable(games) {
@@ -213,6 +243,5 @@
 
     startGame();
   </script>
-
 </body>
 </html>

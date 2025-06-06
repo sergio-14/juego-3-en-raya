@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Tres en Raya</title>
+  <style>
+    body { 
+        font-family: Arial, sans-serif; 
+        text-align: center; 
+        background-color: #02141a;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 7px;
+      justify-content: center;
+      margin-top: 20px;
+      
+    }
+    .cell {
+      border-radius: 10px;
+      width: 100px; height: 100px;
+      font-size: 36px;
+      cursor: pointer;
+      border: 2px solid #04743c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3cff00;
+    }
+    .cell:hover{
+        background-color: #022530;
+        color: aliceblue;
+    }
+    .result, .simulations { 
+        margin-top: 20px;
+        color: #a5eeca; 
+    }
+    table {
+      width: 60%; 
+      margin: 20px auto; 
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #04743c; 
+      padding: 8px;
+      text-align: center;
+    }
+    th { background-color: #03524b; }
+    .tablero { font-family: monospace; white-space: pre; }
+    button {
+      margin: 10px 5px; padding: 10px 20px;
+      background-color: #023632;
+      color: #abd89d;
+      font-size: 16px;
+      border-radius: 12px;
+    }
+    h1, h2 {
+      color: #bcd4c8; 
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 25px;
+    }
+  </style>
+</head>
+<body>
+
+ 
+
+  <h2>Modelación y Simulación de Sistemas</h2>
+   <h1 >
+    Juego de Tres en Raya
+
+  </h1>
+  <div class="board" id="board"></div>
+  <div class="result" id="result"></div>
+  <button onclick="startGame()">Reiniciar</button>
+  <button onclick="simulateGames(15)">Simular 15 Juegos</button>
+
+  <div class="simulations" id="simulationResult"></div>
+
+  <script>
+    let board, currentPlayer, resultShown;
+
+    const winPatterns = [
+      [0,1,2], [3,4,5], [6,7,8], // filas
+      [0,3,6], [1,4,7], [2,5,8], // columnas
+      [0,4,8], [2,4,6]           // diagonales
+    ];
+
+    function startGame() {
+      board = Array(9).fill("");
+      currentPlayer = "X";
+      resultShown = false;
+      const boardDiv = document.getElementById("board");
+      boardDiv.innerHTML = "";
+      document.getElementById("result").textContent = "";
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.index = i;
+        cell.addEventListener("click", onCellClick);
+        boardDiv.appendChild(cell);
+      }
+    }
+
+    function onCellClick(e) {
+      const index = e.target.dataset.index;
+      if (board[index] !== "" || resultShown) return;
+      board[index] = currentPlayer;
+      e.target.textContent = currentPlayer;
+      if (checkWinner(currentPlayer)) {
+        document.getElementById("result").textContent = `¡Gana el jugador con la ${currentPlayer}!`;
+        resultShown = true;
+      } else if (board.every(cell => cell !== "")) {
+        document.getElementById("result").textContent = "Empate: Ningún jugador gana";
+        resultShown = true;
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+      }
+    }
+
+    function checkWinner(player) {
+      return winPatterns.some(pattern => pattern.every(i => board[i] === player));
+    }
+
+    function simulateGames(times) {
+      let xWins = 0, oWins = 0, ties = 0;
+      let gameDetails = [];
+
+      for (let t = 0; t < times; t++) {
+        let b = Array(9).fill("");
+        let turn = "X";
+        let winner = null;
+        let how = "Empate";
+
+        for (let moves = 0; moves < 9 && !winner; moves++) {
+          let emptyIndices = b.map((v, i) => v === "" ? i : null).filter(i => i !== null);
+          let choice = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+          b[choice] = turn;
+
+          for (let p of winPatterns) {
+            if (p.every(i => b[i] === turn)) {
+              winner = turn;
+              // Determinar tipo de victoria
+              if (p[0] % 3 === 0 && p[1] % 3 === 1 && p[2] % 3 === 2) how = "Fila";
+              else if (p[0] < 3 && p[1] < 6 && p[2] < 9 && p[0] % 3 === p[1] % 3) how = "Columna";
+              else how = "Diagonal";
+              break;
+            }
+          }
+
+          turn = turn === "X" ? "O" : "X";
+        }
+
+        if (winner === "X") xWins++;
+        else if (winner === "O") oWins++;
+        else ties++;
+
+        gameDetails.push({
+          juego: t + 1,
+          ganador: winner || "Empate",
+          tipo: winner ? how : "Empate",
+          tablero: drawBoard(b)
+        });
+      }
+
+      document.getElementById("simulationResult").innerHTML = `
+        <p><strong>Resultados de 15 simulaciones:</strong></p>
+        <p>X gana: ${xWins} veces</p>
+        <p>O gana: ${oWins} veces</p>
+        <p>Empates: ${ties} veces</p>
+        ${buildTable(gameDetails)}
+      `;
+    }
+
+    function drawBoard(b) {
+      return `
+      ${b[0] || " "} | ${b[1] || " "} | ${b[2] || " "}
+      ---------
+      ${b[3] || " "} | ${b[4] || " "} | ${b[5] || " "}
+      ---------
+      ${b[6] || " "} | ${b[7] || " "} | ${b[8] || " "}
+      `;
+    }
+
+    function buildTable(games) {
+      let rows = games.map(g => `
+        <tr>
+          <td>${g.juego}</td>
+          <td>${g.ganador}</td>
+          <td>${g.tipo}</td>
+          <td class="tablero"><pre>${g.tablero}</pre></td>
+        </tr>
+      `).join("");
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th># Juego</th>
+              <th>Ganador</th>
+              <th>Forma de victoria</th>
+              <th>Tablero final</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
+
+    startGame();
+  </script>
+
+</body>
+</html>
